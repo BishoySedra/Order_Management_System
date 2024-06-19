@@ -31,14 +31,43 @@ model Product {
   stock        Int
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  orders       OrderProduct[]
+  carts        CartProduct[]
 }
 
 model Order {
   orderId    Int      @id @default(autoincrement())
   orderDate  DateTime @default(now())
   status     String
+  products   OrderProduct[]
 }
 
 model Cart {
   cartId    Int      @id @default(autoincrement())
+  products  CartProduct[]
+}
+
+// Join table for many-to-many relationship between Order and Product
+model OrderProduct {
+  id        Int      @id @default(autoincrement())
+  order     Order    @relation(fields: [orderId], references: [orderId])
+  orderId   Int
+  product   Product  @relation(fields: [productId], references: [productId])
+  productId Int
+
+  // To ensure the combination of orderId and productId is unique
+  @@unique([orderId, productId])
+}
+
+// Join table for many-to-many relationship between Cart and Product
+model CartProduct {
+  id        Int      @id @default(autoincrement())
+  cart      Cart     @relation(fields: [cartId], references: [cartId])
+  cartId    Int
+  product   Product  @relation(fields: [productId], references: [productId])
+  productId Int
+  qty       Int      @default(1)  // Add qty attribute with a default value of 1
+
+  // To ensure the combination of cartId and productId is unique
+  @@unique([cartId, productId])
 }
