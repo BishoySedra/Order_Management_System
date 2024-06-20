@@ -1,17 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create(AppModule);
 
-  const globalPrefix: string = 'api';
-  app.setGlobalPrefix(globalPrefix);
+  // get base url from .env file
+  const baseUrl = process.env.BASE_URL || '/api';
+  app.setGlobalPrefix(baseUrl);
 
+  // get port from .env file
   const port = process.env.PORT || 3000;
-  console.log(`Listening on port ${port}`);
+  console.log(`Server is running on ${port}`);
+
+  // use pipes for validation
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true
+  }));
 
   await app.listen(port);
-  
 }
 bootstrap();

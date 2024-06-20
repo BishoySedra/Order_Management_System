@@ -21,11 +21,15 @@ model User {
   address   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  carts     Cart[]
+  orders    Order[]
+
+  @@map("Users")
 }
 
 model Product {
   productId    Int      @id @default(autoincrement())
-  name         String
+  name         String   @unique
   description  String
   price        Float
   stock        Int
@@ -33,18 +37,28 @@ model Product {
   updatedAt    DateTime @updatedAt
   orders       OrderProduct[]
   carts        CartProduct[]
+
+  @@map("Products")
 }
 
 model Order {
   orderId    Int      @id @default(autoincrement())
   orderDate  DateTime @default(now())
   status     String
+  userId     Int
+  user       User     @relation(fields: [userId], references: [userId])
   products   OrderProduct[]
+
+  @@map("Orders")
 }
 
 model Cart {
   cartId    Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [userId])
   products  CartProduct[]
+
+  @@map("Carts")
 }
 
 // Join table for many-to-many relationship between Order and Product
