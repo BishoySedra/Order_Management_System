@@ -32,7 +32,7 @@ export class CartController {
     }
 
     // route to get a cart by ID
-    @Get(':cartId')
+    @Get('cartId/:cartId')
     async getCartById(@Param('cartId') cartId: string) {
         return this.cartService.getCartById(parseInt(cartId));
     }
@@ -47,6 +47,12 @@ export class CartController {
     @Put('update')
     async updateCart(@Body() data: CartProductDto) {
         return this.cartService.updateCart(data);
+    }
+
+    // route to delete product from cart
+    @Delete('remove')
+    async removeFromCart(@Body() data: CartProductDto) {
+        return this.cartService.removeFromCart(data);
     }
 
 }

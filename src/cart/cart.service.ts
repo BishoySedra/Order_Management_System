@@ -45,22 +45,29 @@ export class CartService {
     // service method to add a product to the cart
     async addToCart(data: CartProductDto) {
         try {
-
-            // check if th cart exists
+            // Check if the cart exists
             const cart = await this.prisma.carts.findFirst({ where: { cartId: data.cartId } });
 
             if (!cart) {
-                throw new customError('Cart not found to be used!', 404);
+                throw new customError('Cart not found', 404);
             }
 
-            // check if the product exists
+            // Check if the product exists
             const product = await this.prisma.products.findFirst({ where: { productId: data.productId } });
 
             if (!product) {
-                throw new customError('Product not found to be added', 404);
+                throw new customError('Product not found', 404);
             }
 
-            // check if the product is already in the cart
+            // Get the number of products in stock
+            const stock = product.stock;
+
+            // Check if the quantity to be added is greater than the stock
+            if (data.qty > stock) {
+                throw new customError('Out of stock', 400);
+            }
+
+            // Check if the product is already in the cart
             const existingProduct = await this.prisma.cartProducts.findFirst({
                 where: {
                     cartId: data.cartId,
@@ -69,25 +76,18 @@ export class CartService {
             });
 
             if (existingProduct) {
-
-                // get the number of products in stock
-                const stock = product.stock;
-
-                // check if the quantity to be added is greater than the stock
-                if (data.qty > stock) {
-                    throw new customError('out of stock!', 400);
-                }
-
-                // if the product is already in the cart, we update the quantity
-                const updatedProduct = await this.prisma.cartProducts.updateMany({
+                // If the product is already in the cart, we update the quantity
+                const updatedProduct = await this.prisma.cartProducts.update({
                     where: {
-                        cartId: data.cartId,
-                        productId: data.productId
+                        cartId_productId: {
+                            cartId: data.cartId,
+                            productId: data.productId
+                        }
                     },
                     data: { qty: existingProduct.qty + data.qty }
                 });
 
-                // update the stock of the product
+                // Update the stock of the product
                 await this.prisma.products.update({
                     where: { productId: data.productId },
                     data: { stock: stock - data.qty }
@@ -97,45 +97,31 @@ export class CartService {
                     message: 'Product added to cart successfully',
                     body: updatedProduct,
                     status: 201
-                }
+                };
+            } else {
+                // If the product is not in the cart, we add it
+                const newProduct = await this.prisma.cartProducts.create({
+                    data: {
+                        cartId: data.cartId,
+                        productId: data.productId,
+                        qty: data.qty
+                    }
+                });
 
+                // Update the stock of the product
+                await this.prisma.products.update({
+                    where: { productId: data.productId },
+                    data: { stock: stock - data.qty }
+                });
+
+                return {
+                    message: 'Product added to cart successfully',
+                    body: newProduct,
+                    status: 201
+                };
             }
-
-            // if the product is not in the cart, we add it
-
-            // get the number of products in stock
-            const stock = product.stock;
-
-            // check if the quantity to be added is greater than the stock
-            if (data.qty > stock) {
-                throw new customError('out of stock!', 400);
-            }
-
-            // add the product to the cart
-            const newProduct = await this.prisma.cartProducts.create({
-                data: {
-                    cartId: data.cartId,
-                    productId: data.productId,
-                    qty: data.qty
-                }
-            });
-
-            // update the stock of the product
-            await this.prisma.products.update({
-                where: { productId: data.productId },
-                data: { stock: stock - data.qty }
-            });
-
-            return {
-                message: 'Product added to cart successfully',
-                body: newProduct,
-                status: 201
-            }
-
         } catch (error) {
-
             return errorHandler(error);
-
         }
     }
 
@@ -336,4 +322,59 @@ export class CartService {
         }
     }
 
+    // service method to delete product from cart
+    async removeFromCart(data: CartProductDto) {
+        try {
+
+            // check if the cart exists
+            const cart = await this.prisma.carts.findFirst({ where: { cartId: data.cartId } });
+
+            if (!cart) {
+                throw new customError('Cart not found', 404);
+            }
+
+            // check if the product exists
+            const product = await this.prisma.products.findFirst({ where: { productId: data.productId } });
+
+            if (!product) {
+                throw new customError('Product not found', 404);
+            }
+
+            // check if the product is in the cart
+            const existingProduct = await this.prisma.cartProducts.findFirst({
+                where: {
+                    cartId: data.cartId,
+                    productId: data.productId
+                }
+            });
+
+            if (!existingProduct) {
+                throw new customError('Product not found in cart', 404);
+            }
+
+            // delete the product from the cart
+            await this.prisma.cartProducts.deleteMany({
+                where: {
+                    cartId: data.cartId,
+                    productId: data.productId
+                }
+            });
+
+            // update the stock of the product
+            await this.prisma.products.update({
+                where: { productId: data.productId },
+                data: { stock: product.stock + existingProduct.qty }
+            });
+
+            return {
+                message: 'Product removed from cart successfully',
+                status: 200
+            }
+
+        } catch (error) {
+
+            return errorHandler(error);
+
+        }
+    }
 }
