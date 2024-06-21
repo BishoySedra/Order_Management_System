@@ -6,14 +6,14 @@ import { productDto } from './dto';
 
 @Injectable()
 export class ProductService {
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService) { }
 
     // service method to create a new product
     async createProduct(data: productDto) {
         try {
-            
+
             // create a new product
-            const product = await this.prisma.product.create({ data });
+            const product = await this.prisma.products.create({ data });
 
             // return the new product
             return {

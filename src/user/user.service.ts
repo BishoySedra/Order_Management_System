@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SignUpDTO, SignInDTO } from './dto';
-import { User } from '@prisma/client';
+import { Users } from '@prisma/client';
 import { customError } from 'src/errors/error';
 import { errorHandler } from 'src/errors/errorHandler';
 import * as argonOperations from 'src/utils/argon';
@@ -10,19 +10,19 @@ import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class UserService {
 
-    constructor(private prisma: PrismaService, private jwt: JwtService) {}
+    constructor(private prisma: PrismaService, private jwt: JwtService) { }
 
     // service method to sign up a new user
     async signUp(data: SignUpDTO) {
 
         try {
-            
+
             // check if the email already exists
-            const userExists = await this.prisma.user.findUnique({ where: { email: data.email } });
+            const userExists = await this.prisma.users.findUnique({ where: { email: data.email } });
 
             // if the email already exists, return an error
             if (userExists) {
-                
+
                 throw new customError('Email already exists', 400);
             }
 
@@ -30,7 +30,7 @@ export class UserService {
             data.password = await argonOperations.hashPassword(data.password);
 
             // create a new user
-            const user: User = await this.prisma.user.create({ data });
+            const user: Users = await this.prisma.users.create({ data });
 
             // remove the password from the user object
             delete user.password;
@@ -46,7 +46,7 @@ export class UserService {
 
             // handle the error
             return errorHandler(error);
-            
+
         }
 
     }
@@ -56,7 +56,7 @@ export class UserService {
         try {
 
             // check if the email exists
-            const user = await this.prisma.user.findUnique({ where: { email: data.email } });
+            const user = await this.prisma.users.findUnique({ where: { email: data.email } });
 
             // if the email does not exist, return an error
             if (!user) {
@@ -72,7 +72,7 @@ export class UserService {
             }
 
             // generate a jwt token
-            const token = await this.jwt.signAsync({id: user.userId, email: user.email}, {
+            const token = await this.jwt.signAsync({ id: user.userId, email: user.email }, {
                 secret: process.env.JWT_SECRET,
                 expiresIn: '1d'
             });
@@ -88,14 +88,133 @@ export class UserService {
                 },
                 status: 200
             }
-            
+
         } catch (error) {
-           
+
             // handle the error
             return errorHandler(error);
-            
+
         }
 
+    }
+
+    // service method to get all users
+    async getAllUsers() {
+        try {
+
+            // get all users
+            const users = await this.prisma.users.findMany();
+
+            // remove the password from the user objects
+            users.forEach(user => {
+                delete user.password;
+            });
+
+            // return the users
+            return {
+                message: 'Users retrieved successfully',
+                body: users,
+                status: 200
+            }
+
+        } catch (error) {
+
+            // handle the error
+            return errorHandler(error);
+
+        }
+    }
+
+    // service method to get a user by id
+    async getUserById(id: number) {
+        try {
+
+            // get the user
+            const user = await this.prisma.users.findUnique({ where: { userId: id } });
+
+            // if the user does not exist, return an error
+            if (!user) {
+                throw new customError('User not found', 404);
+            }
+
+            // return the user
+            return {
+                message: 'User retrieved successfully',
+                body: user,
+                status: 200
+            }
+
+        } catch (error) {
+
+            // handle the error
+            return errorHandler(error);
+
+        }
+    }
+
+    // service method to update a user
+    async updateUser(id: number, data: SignUpDTO) {
+        try {
+
+            // get the user
+            const user = await this.prisma.users.findUnique({ where: { userId: id } });
+
+            // if the user does not exist, return an error
+            if (!user) {
+                throw new customError('User not found', 404);
+            }
+
+            // hash the password
+            data.password = await argonOperations.hashPassword(data.password);
+
+            // update the user
+            const updatedUser = await this.prisma.users.update({ where: { userId: id }, data });
+
+            // remove the password from the user object
+            delete updatedUser.password;
+
+            // return the updated user
+            return {
+                message: 'User updated successfully',
+                body: updatedUser,
+                status: 200
+            }
+
+        } catch (error) {
+
+            // handle the error
+            return errorHandler(error);
+
+        }
+    }
+
+    // service method to delete a user
+    async deleteUser(id: number) {
+        try {
+
+            // get the user
+            const user = await this.prisma.users.findUnique({ where: { userId: id } });
+
+            // if the user does not exist, return an error
+            if (!user) {
+                throw new customError('User not found', 404);
+            }
+
+            // delete the user
+            await this.prisma.users.delete({ where: { userId: id } });
+
+            // return a success message
+            return {
+                message: 'User deleted successfully',
+                status: 200
+            }
+
+        } catch (error) {
+
+            // handle the error
+            return errorHandler(error);
+
+        }
     }
 
 }
