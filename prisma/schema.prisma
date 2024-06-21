@@ -38,7 +38,7 @@ model Products {
 model Orders {
   orderId    Int      @id @default(autoincrement())
   orderDate  DateTime @default(now())
-  status     String
+  status     OrderStatus
   userId     Int
   user       Users    @relation(fields: [userId], references: [userId])
   orderProducts OrderProducts[]
@@ -76,4 +76,14 @@ model CartProducts {
 
   @@unique([cartId, productId])
   @@map("cart_products")
+}
+
+// Enum for Order Status
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
 }
