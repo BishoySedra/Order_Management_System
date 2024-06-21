@@ -1,7 +1,6 @@
 import { Controller, Post, Get, Body, Put, Param } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { OrderDto, updateOrderDto } from './dto';
-import { parse } from 'path';
+import { OrderDto, updateOrderDto, applyCouponDto } from './dto';
 
 @Controller('orders')
 export class OrderController {
@@ -33,5 +32,9 @@ export class OrderController {
         return this.orderService.updateOrderStatus(parseInt(orderId), data);
     }
 
-
+    // route to apply a coupon to an order
+    @Post('apply-coupon')
+    async applyCoupon(@Body() data: applyCouponDto) {
+        return this.orderService.applyCoupon(data);
+    }
 }

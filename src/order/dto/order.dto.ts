@@ -15,3 +15,13 @@ export class updateOrderDto {
     @IsString()
     status: string;
 }
+
+export class applyCouponDto {
+    @IsNotEmpty({ message: 'Coupon code is required' })
+    @IsString()
+    couponCode: string;
+
+    @IsNotEmpty({ message: 'Discount is required' })
+    @IsNumber()
+    discount: number;
+}

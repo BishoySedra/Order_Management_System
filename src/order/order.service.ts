@@ -139,4 +139,14 @@ export class OrderService {
             errorHandler(error);
         }
     }
+
+    // service method to apply a coupon to an order
+    async applyCoupon(data: { couponCode: string }) {
+        try {
+
+        } catch (error) {
+            // handle error
+            errorHandler(error);
+        }
+    }
 }

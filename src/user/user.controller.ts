@@ -44,4 +44,10 @@ export class UserController {
         return this.userService.deleteUser(parseInt(id));
     }
 
+    // route to get orders of a user
+    @Get(':userId/orders')
+    async getUserOrders(@Param('userId') userId: string) {
+        return this.userService.getUserOrders(parseInt(userId));
+    }
+
 }

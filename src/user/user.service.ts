@@ -217,4 +217,33 @@ export class UserService {
         }
     }
 
+    // service method to get orders of a user
+    async getUserOrders(userId: number) {
+        try {
+
+            // get the user
+            const user = await this.prisma.users.findUnique({ where: { userId } });
+
+            // if the user does not exist, return an error
+            if (!user) {
+                throw new customError('User not found', 404);
+            }
+
+            // get the orders of the user
+            const orders = await this.prisma.orders.findMany({ where: { userId } });
+
+            // return the orders
+            return {
+                message: 'Orders retrieved successfully',
+                body: orders,
+                status: 200
+            }
+
+        } catch (error) {
+
+            // handle the error
+            return errorHandler(error);
+
+        }
+    }
 }
