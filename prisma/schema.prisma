@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId Int @default(autoincrement()) @id
+  name String
+  email String @unique
+  password String
+  address String? @default("")
+  cart Cart? 
+  orders Order[]
+}
+
+model Cart {
+  cartId Int @default(autoincrement()) @id
+  userId Int @unique
+  user User @relation(fields: [userId], references: [userId])
+  products CartProduct[]
+}
+
+model Product {
+  productId Int @default(autoincrement()) @id
+  name String
+  description String
+  price Decimal
+  stock Int
+  carts CartProduct[]
+  orders OrderProduct[]
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+  REFUNDED
+}
+
+model Order {
+  orderId Int @default(autoincrement()) @id
+  orderDate DateTime 
+  total Decimal
+  status OrderStatus
+  user User @relation(fields: [userId], references: [userId])
+  userId Int 
+  products OrderProduct[]
+}
+
+model CartProduct {
+  cartId Int
+  cart Cart @relation(fields: [cartId], references: [cartId])
+  productId Int
+  product Product @relation(fields: [productId], references: [productId])
+  quantity Int
+  @@id([cartId, productId])
+}
+
+model OrderProduct {
+  orderId Int
+  order Order @relation(fields: [orderId], references: [orderId])
+  productId Int
+  product Product @relation(fields: [productId], references: [productId])
+  quantity Int
+  total Decimal
+  @@id([orderId, productId])
+}
