@@ -34,21 +34,11 @@ model Product {
   orders OrderProduct[]
 }
 
-enum OrderStatus {
-  PENDING
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  RETURNED
-  REFUNDED
-}
-
 model Order {
   orderId Int @default(autoincrement()) @id
-  orderDate DateTime 
-  total Int
-  status OrderStatus
+  orderDate DateTime
+  total Int 
+  status String 
   user User @relation(fields: [userId], references: [userId])
   userId Int 
   products OrderProduct[]
