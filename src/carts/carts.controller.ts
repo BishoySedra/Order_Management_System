@@ -1,4 +1,4 @@
-import { Controller, Post, Param, Body, Get, Put } from '@nestjs/common';
+import { Controller, Post, Param, Body, Get, Put, Delete } from '@nestjs/common';
 import { CartsService } from './carts.service';
 import * as cartDto from './dto/cart.dto';
 
@@ -30,5 +30,11 @@ export class CartsController {
     @Put('update')
     async updateProductQuantity(@Body() body: cartDto.AddProductDto) {
         return this.cartsService.updateProductQuantity(body);
+    }
+
+    // endpoint to remove a product from a cart
+    @Delete('remove')
+    async removeProduct(@Body() body: cartDto.removeProductDto) {
+        return this.cartsService.removeProduct(body);
     }
 }

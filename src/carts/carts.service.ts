@@ -338,21 +338,164 @@ export class CartsService {
                 }
             }
 
-            // to be continued...
+            const totalQuantity = productInCart.quantity + product.stock;
+
+            // check if the quantity is greater than the available quantity
+            if (quantity > totalQuantity) {
+                return {
+                    message: 'Quantity exceeds available quantity',
+                    body: null,
+                    status: 400
+                }
+            }
+
+            // check if the quantity is less than the current quantity
+            if (quantity < productInCart.quantity) {
+                // update the product stock
+                await this.prisma.product.update({
+                    where: {
+                        productId
+                    },
+                    data: {
+                        stock: product.stock + (productInCart.quantity - quantity)
+                    }
+                });
+            } else {
+                // update the product stock
+                await this.prisma.product.update({
+                    where: {
+                        productId
+                    },
+                    data: {
+                        stock: product.stock - (quantity - productInCart.quantity)
+                    }
+                });
+            }
+
+            // update the quantity of the product in the cart
+            const updatedProduct = await this.prisma.cartProduct.update({
+                where: {
+                    cartId_productId: {
+                        cartId,
+                        productId
+                    }
+                },
+                data: {
+                    quantity
+                }
+            });
 
             return {
-                message: 'Product quantity updated successfully',
-                body: null,
+                message: 'Product quantity updated',
+                body: updatedProduct,
                 status: 200
             }
 
         } catch (error) {
+
             return {
                 message: error.message,
                 body: null,
                 status: 500
             }
+
         }
 
+    }
+
+    // service method to remove a product from a cart
+    async removeProduct(body: cartDto.removeProductDto) {
+        try {
+
+            // destructuring the body
+            const { cartId, productId } = body;
+
+            // check if the cart exists
+            const cart = await this.prisma.cart.findUnique({
+                where: {
+                    cartId
+                }
+            });
+
+            // if the cart does not exist, throw an error
+            if (!cart) {
+                return {
+                    message: 'Cart not found',
+                    body: null,
+                    status: 404
+                }
+            }
+
+            // check if the product exists
+            const product = await this.prisma.product.findUnique({
+                where: {
+                    productId
+                }
+            });
+
+            // if the product does not exist, throw an error
+            if (!product) {
+                return {
+                    message: 'Product not found',
+                    body: null,
+                    status: 404
+                }
+            }
+
+            // check if the product is in the cart
+            const productInCart = await this.prisma.cartProduct.findFirst({
+                where: {
+                    cartId,
+                    productId
+                }
+            });
+
+            // if the product is not in the cart, throw an error
+            if (!productInCart) {
+                return {
+                    message: 'Product not in cart',
+                    body: null,
+                    status: 404
+                }
+            }
+
+            // get the product quantity
+            const quantity = productInCart.quantity;
+
+            // remove the product from the cart
+            await this.prisma.cartProduct.delete({
+                where: {
+                    cartId_productId: {
+                        cartId,
+                        productId
+                    }
+                }
+            });
+
+            // update the product stock
+            await this.prisma.product.update({
+                where: {
+                    productId
+                },
+                data: {
+                    stock: product.stock + quantity
+                }
+            });
+
+            return {
+                message: 'Product removed from cart',
+                body: null,
+                status: 200
+            }
+
+        } catch (error) {
+
+            return {
+                message: error.message,
+                body: null,
+                status: 500
+            }
+
+        }
     }
 }

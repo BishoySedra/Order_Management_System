@@ -23,3 +23,15 @@ export class AddProductDto {
     quantity: number;
 
 }
+
+export class removeProductDto {
+
+    @IsNotEmpty()
+    @IsNumber()
+    cartId: number;
+
+    @IsNotEmpty()
+    @IsNumber()
+    productId: number;
+
+}
