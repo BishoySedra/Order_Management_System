@@ -1,7 +1,6 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
 import { UsersService } from './users.service';
 import * as userDto from './dto';
-import { parse } from 'path';
 
 @Controller('users')
 export class UsersController {
@@ -15,10 +14,40 @@ export class UsersController {
         return this.usersService.signUp(signUpDto);
     }
 
+    // endpoint to sign in a user
+    @Post('auth/login')
+    async signIn(@Body() signInDto: userDto.SignInDto) {
+        return this.usersService.login(signInDto);
+    }
+
     // endpoint to get order history of a user [BONUS]
     @Get(':userId/orders')
     async getOrderHistory(@Param('userId') userId: string) {
         return this.usersService.getOrderHistory(parseInt(userId));
+    }
+
+    // endpoint to get all users
+    @Get()
+    async getAllUsers() {
+        return this.usersService.getAllUsers();
+    }
+
+    // endpoint to get a user by id
+    @Get(':userId')
+    async getUserById(@Param('userId') userId: string) {
+        return this.usersService.getUserById(parseInt(userId));
+    }
+
+    // endpoint to update user profile
+    @Put(':userId')
+    async updateUserProfile(@Param('userId') userId: string, @Body() body: userDto.UpdateUserDto) {
+        return this.usersService.updateUserProfile(parseInt(userId), body);
+    }
+
+    // endpoint to delete a user
+    @Delete(':userId')
+    async deleteUser(@Param('userId') userId: string) {
+        return this.usersService.deleteUser(parseInt(userId));
     }
 
 }
