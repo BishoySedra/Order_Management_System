@@ -56,4 +56,62 @@ export class UsersService {
             }
         }
     }
+
+    // service method to get order history of a user [BONUS]
+    async getOrderHistory(userId: number) {
+        try {
+
+            // check if the user exists
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    userId
+                }
+            });
+
+            // if the user does not exist, return an error message
+            if (!user) {
+                return {
+                    message: 'User not found',
+                    body: null,
+                    status: 404
+                }
+            }
+
+            // get the order history of the user
+            const orderHistory = await this.prisma.order.findMany({
+                where: {
+                    userId
+                }, select: {
+                    orderId: true,
+                    orderDate: true,
+                    total: true,
+                    products: {
+                        select: {
+                            quantity: true,
+                            product: {
+                                select: {
+                                    name: true,
+                                    price: true
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // return the order history
+            return {
+                message: 'Order history retrieved successfully',
+                body: orderHistory,
+                status: 200
+            }
+
+        } catch (error) {
+            return {
+                message: error.message,
+                body: null,
+                status: 500
+            }
+        }
+    }
 }
