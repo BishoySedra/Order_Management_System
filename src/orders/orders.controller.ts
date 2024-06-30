@@ -26,4 +26,10 @@ export class OrdersController {
         return this.ordersService.updateOrderStatus(parseInt(orderId), status);
     }
 
+    // endpoint to apply coupon to order [BONUS]
+    @Post('apply-coupon')
+    async applyCoupon(@Body() body: orderDto.applyCouponDto) {
+        return this.ordersService.applyCoupon(body);
+    }
+
 }

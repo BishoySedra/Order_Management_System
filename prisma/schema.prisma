@@ -62,3 +62,9 @@ model OrderProduct {
   total Int
   @@id([orderId, productId])
 }
+
+model Coupons {
+  couponId Int @default(autoincrement()) @id
+  code String @unique
+  discount Int
+}

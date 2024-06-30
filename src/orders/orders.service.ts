@@ -205,4 +205,94 @@ export class OrdersService {
         }
 
     }
+
+    // service method to apply coupon to order [BONUS]
+    async applyCoupon(body: orderDto.applyCouponDto) {
+        try {
+            // destructuring the body object
+            const { orderId, code } = body;
+
+            // check if the order exists
+            const order = await this.prisma.order.findUnique({
+                where: {
+                    orderId
+                }
+            });
+
+            // if the order does not exist, return an error
+            if (!order) {
+                return {
+                    message: 'Order not found',
+                    body: null,
+                    status: 404
+                }
+            }
+
+            // check if the coupon exists
+            const coupon = await this.prisma.coupons.findUnique({
+                where: {
+                    code
+                }
+            });
+
+            // if the coupon does not exist, return an error
+            if (!coupon) {
+                return {
+                    message: 'Coupon not found',
+                    body: null,
+                    status: 404
+                }
+            }
+
+            // check the status of the order
+            if (order.status === 'DISCOUNTED' || order.status === 'PROCESSED') {
+                return {
+                    message: 'Order already discounted or processed',
+                    body: null,
+                    status: 400
+                }
+            }
+
+            // get the order total price
+            const orderTotal = order.total;
+
+            // calculate the new total price
+            const discount = (orderTotal * coupon.discount) / 100;
+
+            // apply the coupon to the order
+            const updatedOrder = await this.prisma.order.update({
+                where: {
+                    orderId
+                },
+                data: {
+                    total: order.total - discount
+                }
+            });
+
+            // update the order status
+            await this.prisma.order.update({
+                where: {
+                    orderId
+                },
+                data: {
+                    status: 'DISCOUNTED'
+                }
+            });
+
+            // return the updated order
+            return {
+                message: 'Coupon applied',
+                body: updatedOrder,
+                status: 200
+            }
+
+
+        } catch (error) {
+            return {
+                message: error.message,
+                body: null,
+                status: 500
+            }
+        }
+    }
 }

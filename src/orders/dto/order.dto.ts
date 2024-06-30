@@ -21,3 +21,13 @@ export class updateOrderStatusDto {
     status: string;
 
 }
+
+export class applyCouponDto {
+    @IsNotEmpty()
+    @IsNumber()
+    orderId: number;
+
+    @IsNotEmpty()
+    @IsString()
+    code: string;
+}
