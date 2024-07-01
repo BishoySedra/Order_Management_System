@@ -498,4 +498,137 @@ export class CartsService {
 
         }
     }
+
+    // service method to get all carts
+    async getAllCarts() {
+        try {
+            // get all carts
+            const carts = await this.prisma.cart.findMany({
+                include: {
+                    user: {
+                        select: {
+                            name: true
+                        }
+                    },
+                    products: {
+                        include: {
+                            product: {
+                                select: {
+                                    name: true,
+                                    price: true
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            return {
+                message: 'Carts retrieved successfully',
+                body: carts,
+                status: 200
+            }
+
+        } catch (error) {
+            return {
+                message: error.message,
+                body: null,
+                status: 500
+            }
+        }
+    }
+
+    // service method to get a cart by id
+    async getCartById(cartId: cartDto.AddProductDto['cartId']) {
+        try {
+
+            // check if the cart exists
+            const cart = await this.prisma.cart.findUnique({
+                where: {
+                    cartId
+                },
+                include: {
+                    user: {
+                        select: {
+                            name: true
+                        }
+                    },
+                    products: {
+                        include: {
+                            product: {
+                                select: {
+                                    name: true,
+                                    price: true
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // if the cart does not exist, throw an error
+            if (!cart) {
+                return {
+                    message: 'Cart not found',
+                    body: null,
+                    status: 404
+                }
+            }
+
+            return {
+                message: 'Cart retrieved successfully',
+                body: cart,
+                status: 200
+            }
+
+        } catch (error) {
+            return {
+                message: error.message,
+                body: null,
+                status: 500
+            }
+        }
+    }
+
+    // service method to delete a cart by id
+    async deleteCart(cartId: cartDto.AddProductDto['cartId']) {
+        try {
+
+            // check if the cart exists
+            const cart = await this.prisma.cart.findUnique({
+                where: {
+                    cartId
+                }
+            });
+
+            // if the cart does not exist, throw an error
+            if (!cart) {
+                return {
+                    message: 'Cart not found',
+                    body: null,
+                    status: 404
+                }
+            }
+
+            // delete the cart
+            await this.prisma.cart.delete({
+                where: {
+                    cartId
+                }
+            });
+
+            return {
+                message: 'Cart deleted successfully',
+                body: null,
+                status: 200
+            }
+
+        } catch (error) {
+            return {
+                message: error.message,
+                body: null,
+                status: 500
+            }
+        }
+    }
 }

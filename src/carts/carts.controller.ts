@@ -37,4 +37,22 @@ export class CartsController {
     async removeProduct(@Body() body: cartDto.removeProductDto) {
         return this.cartsService.removeProduct(body);
     }
+
+    // endpoint to get all carts
+    @Get()
+    async getAllCarts() {
+        return this.cartsService.getAllCarts();
+    }
+
+    // endpoint to get cart by id
+    @Get('/cartId/:cartId')
+    async getCartById(@Param('cartId') cartId: string) {
+        return this.cartsService.getCartById(parseInt(cartId));
+    }
+
+    // endpoint to delete a cart by id
+    @Delete(':cartId')
+    async deleteCart(@Param('cartId') cartId: string) {
+        return this.cartsService.deleteCart(parseInt(cartId));
+    }
 }
