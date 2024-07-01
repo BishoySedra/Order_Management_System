@@ -295,4 +295,68 @@ export class OrdersService {
             }
         }
     }
+
+    // service method to get all orders
+    async getAllOrders() {
+        try {
+            // get all orders
+            const orders = await this.prisma.order.findMany();
+
+            // return the orders
+            return {
+                message: 'Orders retrieved successfully',
+                body: orders,
+                status: 200
+            }
+        } catch (error) {
+            return {
+                message: error.message,
+                body: null,
+                status: 500
+            }
+        }
+    }
+
+    // service method to get all orders by user id
+    async getOrdersByUserId(userId: orderDto.createOrderDto['userId']) {
+        try {
+            // check if the user exists
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    userId
+                }
+
+            });
+
+            // if the user does not exist, return an error
+            if (!user) {
+                return {
+                    message: 'User not found',
+                    body: null,
+                    status: 404
+                }
+            }
+
+            // get all orders by user id
+            const orders = await this.prisma.order.findMany({
+                where: {
+                    userId
+                }
+            });
+
+            // return the orders
+            const ordersNumber: number = orders.length;
+            return {
+                message: `Orders retrieved successfully for user ${userId} with ${ordersNumber} orders.`,
+                body: orders,
+                status: 200
+            }
+        } catch (error) {
+            return {
+                message: error.message,
+                body: null,
+                status: 500
+            }
+        }
+    }
 }

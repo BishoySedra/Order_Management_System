@@ -32,4 +32,15 @@ export class OrdersController {
         return this.ordersService.applyCoupon(body);
     }
 
+    // endpoint to get all orders
+    @Get()
+    async getAllOrders() {
+        return this.ordersService.getAllOrders();
+    }
+
+    // endpoint to get all orders by user id
+    @Get('user/:userId')
+    async getOrdersByUserId(@Param('userId') userId: string) {
+        return this.ordersService.getOrdersByUserId(parseInt(userId));
+    }
 }
