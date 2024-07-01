@@ -2,17 +2,16 @@
 
 Welcome to the Order Management System API. This README file provides information on setting up the environment, launching the application, and accessing the API documentation.
 
-## Brief Overview
-
-The Order Management System API is a web-based application designed to streamline the order management process for e-commerce applications. It provides functionalities such as creating new orders, updating existing orders, and retrieving order information. The API is built using Nest.js and utilizes a PostgreSQL database for data storage.
-
 ## Table of Contents
 
 - [Brief Overview](#brief-overview)
 - [Setting Up the Environment](#setting-up-the-environment)
 - [Launching the Application](#launching-the-application)
 - [API Documentation](#api-documentation)
-- [Support](#support)
+
+## Brief Overview
+
+The Order Management System API is a web-based application designed to streamline the order management process for e-commerce applications. It provides functionalities such as creating new orders, updating existing orders, and retrieving order information. The API is built using Nest.js and utilizes a PostgreSQL database for data storage.
 
 ## Setting Up the Environment
 
@@ -62,7 +61,3 @@ To launch the Order Management System API, use the following commands:
 ## API Documentation
 
 The API documentation for the Order Management System API can be found on Postman. You can access it [here](https://documenter.getpostman.com/view/32763635/2sA3duHE5w).
-
-## Support
-
-If you encounter any issues or have questions, please open an issue in the repository or contact me.
